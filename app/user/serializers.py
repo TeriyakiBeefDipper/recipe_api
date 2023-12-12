@@ -14,6 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data.get('email')
         password = validated_data.get('password')
         name = validated_data.get('name')
-        user = get_user_model().objects.create_user(email=email,password=password, name=name)
+        user = get_user_model().objects.create_user(email=email, password=password, name=name)   # noqa
         user.set_password(password)
         return user
