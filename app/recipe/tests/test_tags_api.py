@@ -70,7 +70,7 @@ class PrivateTagsApiTests(TestCase):
 
     def test_delete_tag(self):
         """test deleting a tag"""
-        tag = Tag.objects.create(user=self.user,name='Breakfast')
+        tag = Tag.objects.create(user=self.user, name='Breakfast')
         url = detail_url(tag.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)

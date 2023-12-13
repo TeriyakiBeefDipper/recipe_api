@@ -26,8 +26,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class TagViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mixins.ListModelMixin,
-                 viewsets.GenericViewSet):  # noqa, UpdateModelMixin is for request.patch
+class TagViewSet(mixins.DestroyModelMixin,  # for delete request
+                 mixins.UpdateModelMixin,  # for patch request
+                 mixins.ListModelMixin,
+                 viewsets.GenericViewSet):
     """Manage tags in database"""
     serializer_class = serializers.TagSerializer
     queryset = Tag.objects.all()
