@@ -5,8 +5,14 @@ from core.models import Recipe, Tag, Ingredient
 from . import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, OpenApiTypes  # noqa
 
 
+@extend_schema_view(list=extend_schema(
+    parameters=[OpenApiParameter('tags', OpenApiTypes.STR,
+                                 description='comma separated list of tag IDs to filter'),  # noqa
+                OpenApiParameter('ingredients', OpenApiTypes.STR,
+                                 description='comma separated list of ingredient IDs to fileter')]))  # noqa
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.RecipeDetailSerializer  # noqa this is changed from RecipeSerializer to DetailSerializer, because the get_serializer Detail class
     # more functions will use detail serializer than list serializer
@@ -14,8 +20,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def _params_to_int(self, qs):
+        """convert list of strings to integers"""
+        return [int(str_id) for str_id in qs.split(',')]
+
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset
+        if tags:
+            tag_ids = self._params_to_int(tags)
+            queryset = queryset.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ingredient_ids = self._params_to_int(ingredients)
+            queryset = queryset.filter(ingredients__id__in=ingredient_ids)
+        return queryset.filter(user=self.request.user).order_by('-id').distinct()  # noqa
+        # return self.queryset.filter(user=self.request.user).order_by('-id')
 
     def get_serializer_class(self):  # this is for the detail view
         """return the serializer class for request"""
